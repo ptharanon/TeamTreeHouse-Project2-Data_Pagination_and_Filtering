@@ -219,3 +219,8 @@ header h2 {
 		box-shadow: 0 4px 16px 0 rgba(22, 42, 90, 0.09);
 	}
 }
+
+/* Only hightlight error message by coloring red */
+#error {
+  color: red;
+}

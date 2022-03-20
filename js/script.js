@@ -24,7 +24,7 @@ const showPage = (list, page) => {
    const startIndex = (page * ItemPerPage) - ItemPerPage;
    let endIndex = page * ItemPerPage;
 
-   endIndex = (endIndex > list.length) ? list.length : endIndex; 
+   endIndex = (endIndex > list.length) ? list.length : endIndex;
 
    const ul = document.querySelector('.student-list');
    ul.innerHTML = '';
@@ -71,31 +71,35 @@ This function will create and insert/append the elements needed for the paginati
 */
 
 const addPagination = list => {
-   const totalPage = Math.ceil(data.length/ItemPerPage);
+   const totalPage = Math.ceil(list.length / ItemPerPage);
    const ul = document.querySelector('.link-list');
-
    ul.innerHTML = '';
 
-   for(let i = 0; i < totalPage; i++){
+   if (!list.length) {
+      ul.textContent = 'No results found';
+      return;
+   };
+
+   for (let i = 0; i < totalPage; i++) {
       const li = document.createElement('li');
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.textContent = i+1;
+      btn.textContent = i + 1;
 
       li.appendChild(btn);
       ul.append(li);
    }
 
-   ul.childNodes[initialPage-1].firstChild.classList.add('active');
+   ul.childNodes[initialPage - 1].firstChild.classList.add('active');
 
    const navigationBtn = document.querySelectorAll('button');
    navigationBtn.forEach(btn => btn.addEventListener('click', e => {
       const currentActive = document.querySelector('.active');
 
-      if(currentActive != e.target){
+      if (currentActive != e.target) {
          currentActive.classList.remove('active');
          e.target.classList.add('active');
-         showPage(data,e.target.textContent);
+         showPage(list, e.target.textContent);
       }
    }));
 }
@@ -103,7 +107,7 @@ const addPagination = list => {
 /*
 Create search bar
 */
-
+// data-toggle="tooltip" data-placement="top" title="Tooltip on top"
 const createSearchBar = () => {
    const header = document.querySelector('.header');
 
@@ -117,6 +121,10 @@ const createSearchBar = () => {
    span.textContent = 'Search by name';
 
    label.appendChild(span);
+
+   const divSpan = document.createElement('div');
+   divSpan.id = 'error';
+   label.appendChild(divSpan);
 
    const input = document.createElement('input');
    input.id = 'search';
@@ -136,12 +144,50 @@ const createSearchBar = () => {
    btn.appendChild(img);
 }
 
+/*
+Search function
+*/
+
+const search = (target) => {
+   const errorPattern = /[^a-zA-Z\s:]/;
+   const divSpan = document.getElementById('error');
+
+   if (target === '') {
+      divSpan.textContent = '';
+      return data;
+   }
+
+   if(errorPattern.test(target)) {
+      divSpan.textContent = 'Can only search using alphabets';
+      console.log(divSpan);
+      return;
+   }
+   else {
+      divSpan.textContent = '';
+   }
+
+   const pattern = new RegExp(target, 'ig');
+   let matchResult = []
+
+   data.forEach(item => {
+      let fullName = `${item.name.first} ${item.name.last}`;
+
+      (pattern.test(fullName)) ? matchResult.push(item) : null;
+   });
+
+   showPage(matchResult, initialPage);
+   addPagination(matchResult);
+}
 
 // Call functions
 
 const ItemPerPage = 9;
 const initialPage = 1;
 
-showPage(data,initialPage);
+showPage(data, initialPage);
 addPagination(data);
 createSearchBar();
+
+const searchBar = document.querySelector('#search');
+
+searchBar.addEventListener('keyup', e => search(e.target.value));
